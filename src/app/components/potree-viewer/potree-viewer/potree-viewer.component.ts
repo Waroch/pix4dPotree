@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {Viewer} from '../../../services/viewer';
-import {PointCloudOctree, PointShape} from '@pix4d/three-potree-loader';
+import {PointCloudOctree} from '@pix4d/three-potree-loader';
 import {ViewerSettingManager} from '../../../services/ViewerSettingManager';
 
 @Component({
@@ -8,9 +8,10 @@ import {ViewerSettingManager} from '../../../services/ViewerSettingManager';
   templateUrl: './potree-viewer.component.html',
   styleUrls: ['./potree-viewer.component.css']
 })
-export class PotreeViewerComponent implements OnInit {
+export class PotreeViewerComponent implements OnInit, OnDestroy {
   viewer: Viewer;
   pointCloudOctree: PointCloudOctree;
+  idChange: number;
 
   constructor() {
   }
@@ -26,7 +27,7 @@ export class PotreeViewerComponent implements OnInit {
   }
 
   ngOnInit() {
-    ViewerSettingManager.Instance.onChange(() => {
+    this.idChange = ViewerSettingManager.Instance.onChange(() => {
       this.updatePointCloud();
     });
     this.viewer = new Viewer();
@@ -49,5 +50,13 @@ export class PotreeViewerComponent implements OnInit {
         this.updatePointCloud();
       })
       .catch(err => console.error(err));
+  }
+
+  /**
+   * Clear memory
+   */
+  ngOnDestroy() {
+    ViewerSettingManager.Instance.offChange(this.idChange);
+    this.viewer.destroy();
   }
 }

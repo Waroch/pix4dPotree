@@ -1,5 +1,10 @@
 import {PointShape, PointColorType} from '@pix4d/three-potree-loader';
 
+// This class need to inherit from an event manager.
+
+/**
+ * Singleton to manage settings
+ */
 export class ViewerSettingManager {
   private static _instance: ViewerSettingManager;
   private _shape: PointShape = PointShape.CIRCLE;
@@ -29,10 +34,27 @@ export class ViewerSettingManager {
     return this._instance || (this._instance = new this());
   }
 
+  /**
+   * Add a function to call on change.
+   * @param callback
+   * @returns {number}
+   */
   public onChange(callback) {
     this._changesCallback.push(callback);
+    return this._changesCallback.length - 1;
   }
 
+  /**
+   * remove a function to call
+   * @param id
+   */
+  public offChange(id) {
+    this._changesCallback[id] = undefined;
+  }
+
+  /**
+   * Call all function listening to changes.
+   */
   private changesRequested() {
     for (let i = 0; i < this._changesCallback.length; i++) {
       this._changesCallback[i]();
